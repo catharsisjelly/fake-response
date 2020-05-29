@@ -2,8 +2,9 @@
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
+use Symfony\Component\Yaml\Yaml;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 /**
  * Instantiate App
@@ -30,12 +31,34 @@ $app->addRoutingMiddleware();
  */
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-// Define app routes
-$app->get('/hello/{name}', function (Request $request, Response $response, $args) {
-    $name = $args['name'];
-    $response->getBody()->write("Hello, $name");
-    return $response;
-});
+$config = Yaml::parseFile(__DIR__ . '/../../config/rest.yml');
+$config = Yaml::parseFile(__DIR__ . '/../../config/rest-v2.yml');
+
+foreach ($config['routes'] as $route) {
+    $path = $route['path'];
+    var_dump($path);
+    foreach ($route['methods'] as $method => $params) {
+        $app->$method($path, function (Request $request, Response $response, $args) use ($params) {
+            var_dump($args);
+            var_dump($params);
+        });
+    }
+}
+
+//foreach ($config['routes'] as $route) {
+//    var_dump($route);
+//    foreach ($route as $method => $v) {
+//        var_dump($method);
+//        var_dump($v);
+//        // Define app routes
+//        $app->get('/hello/{name}', function (Request $request, Response $response, $args) {
+//            $name = $args['name'];
+//            $response->getBody()->write("Hello, $name");
+//            return $response;
+//        });
+//    }
+//}
+
 
 // Run app
 $app->run();
