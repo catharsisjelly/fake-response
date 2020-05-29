@@ -1,13 +1,13 @@
 type: rest
+request:
+  headers:
+    Content-Type: "application/json"
+    ApiToken: "dslkfjsdlkjfdslkjffdslkj"
+response:
+  Content-Type: "application/json; charset=utf-8"
 route:
   get:
     path: /foo/bar
-    request:
-      headers:
-        Content-Type: "application/json"
-        ApiToken: "dslkfjsdlkjfdslkjffdslkj"
-    response:
-      Content-Type: "application/json; charset=utf-8"
     pass:
       request:
         body:
