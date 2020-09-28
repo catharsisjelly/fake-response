@@ -1,20 +1,22 @@
-type: rest
 request:
   headers:
     Content-Type: "application/json"
-    ApiToken: "dslkfjsdlkjfdslkjffdslkj"
+    Bearer: "dslkfjsdlkjfdslkjffdslkj"
 response:
-  Content-Type: "application/json; charset=utf-8"
-route:
-  get:
-    path: /foo/bar
-    pass:
-      request:
-        body:
-          foo: bar
-      response:
-        body:
-          SearchSummary:
+  headers:
+    Content-Type: "application/json; charset=utf-8"
+routes:
+  - path: /foo/bar
+    methods:
+      get:
+        200:
+          body:
             TotalRecordsFound: 204
             Offset: 0
             RecordsReturned: 10
+        400:
+          body:
+            error: 400
+            message: "Failed"
+      put:
+        foo: bar

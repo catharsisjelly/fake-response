@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  php:
+    image: php:7.1-fpm
+    restart: always
+    environment:
+      XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9000 remote_enable=1
+    volumes:
+      - ./:/var/www/html
+
+  nginx:
+    build:
+      context: ./build/nginx
+    image: catharsisjelly/nginx:stable
+    restart: always
+    ports:
+      - 4430:443
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - php

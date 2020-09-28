@@ -1,1 +1,1 @@
-"# fake-response" 
+# Fake Response

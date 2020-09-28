@@ -1,8 +1,10 @@
 <?php
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+
+use App\Middleware\RequestConfigMiddleware;
+use GuzzleHttp\Psr7\Request;
 use Slim\Factory\AppFactory;
 use Symfony\Component\Yaml\Yaml;
+use GuzzleHttp\Psr7\Response;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
@@ -32,33 +34,25 @@ $app->addRoutingMiddleware();
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
 $config = Yaml::parseFile(__DIR__ . '/../../config/rest.yml');
-$config = Yaml::parseFile(__DIR__ . '/../../config/rest-v2.yml');
+
+$app->add(new RequestConfigMiddleware($config['request'] ?? null));
 
 foreach ($config['routes'] as $route) {
     $path = $route['path'];
-    var_dump($path);
+    if (!array_key_exists('methods', $route)) {
+        continue;
+    }
     foreach ($route['methods'] as $method => $params) {
         $app->$method($path, function (Request $request, Response $response, $args) use ($params) {
-            var_dump($args);
-            var_dump($params);
+            $responseStatus = (int) $request->getHeaderLine('X-Response-Requested') ?? 200; // Default to OK
+
+            $response->withStatus($responseStatus);
+            $response->withHeader('Content-Type', 'application/json');
+            $response->getBody()->write(json_encode($params[$responseStatus]));
+            return $response;
         });
     }
 }
-
-//foreach ($config['routes'] as $route) {
-//    var_dump($route);
-//    foreach ($route as $method => $v) {
-//        var_dump($method);
-//        var_dump($v);
-//        // Define app routes
-//        $app->get('/hello/{name}', function (Request $request, Response $response, $args) {
-//            $name = $args['name'];
-//            $response->getBody()->write("Hello, $name");
-//            return $response;
-//        });
-//    }
-//}
-
 
 // Run app
 $app->run();
