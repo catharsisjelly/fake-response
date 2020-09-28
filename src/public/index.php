@@ -1,6 +1,7 @@
 <?php
 
 use App\Middleware\RequestConfigMiddleware;
+use App\Middleware\ResponseConfigMiddleware;
 use GuzzleHttp\Psr7\Request;
 use Slim\Factory\AppFactory;
 use Symfony\Component\Yaml\Yaml;
@@ -34,7 +35,6 @@ $app->addRoutingMiddleware();
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
 $config = Yaml::parseFile(__DIR__ . '/../../config/rest.yml');
-
 $app->add(new RequestConfigMiddleware($config['request'] ?? null));
 
 foreach ($config['routes'] as $route) {
@@ -42,14 +42,22 @@ foreach ($config['routes'] as $route) {
     if (!array_key_exists('methods', $route)) {
         continue;
     }
-    foreach ($route['methods'] as $method => $params) {
-        $app->$method($path, function (Request $request, Response $response, $args) use ($params) {
-            $responseStatus = (int) $request->getHeaderLine('X-Response-Requested') ?? 200; // Default to OK
 
-            $response->withStatus($responseStatus);
-            $response->withHeader('Content-Type', 'application/json');
-            $response->getBody()->write(json_encode($params[$responseStatus]));
-            return $response;
+    foreach ($route['methods'] as $method => $params) {
+        $app->$method($path, function (Request $request, Response $response, $args) use ($params, $route) {
+
+            if ($route['parameters']) {
+                foreach ($route['parameters'] as $parameter => $regex) {
+                    if (!preg_match(":" . $regex . ":", $args[$parameter])) {
+                        return $response->withStatus(400);
+                    }
+                }
+            }
+
+            $responseStatus = (int) $request->getHeaderLine('X-Response-Requested') ?? 200; // Default to OK
+            $response->getBody()->write(json_encode($params[$responseStatus]['body']));
+            return $response->withStatus($responseStatus)
+                ->withHeader('Content-type', 'application/json; charset=utf-8');
         });
     }
 }

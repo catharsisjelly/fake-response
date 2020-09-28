@@ -2,9 +2,6 @@ request:
   headers:
     Content-Type: "application/json"
     Bearer: "dslkfjsdlkjfdslkjffdslkj"
-response:
-  headers:
-    Content-Type: "application/json; charset=utf-8"
 routes:
   - path: /foo/bar
     methods:
@@ -17,6 +14,17 @@ routes:
         400:
           body:
             error: 400
-            message: "Failed"
+            message: Failed
       put:
         foo: bar
+  - path: /foo/{id}/wibble
+    parameters:
+      id: '\d+'
+    methods:
+      get:
+        200:
+          body:
+            TotalRecordsFound: 204
+            Offset: 0
+            RecordsReturned: 10
+        404:
