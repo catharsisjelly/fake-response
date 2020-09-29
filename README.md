@@ -4,7 +4,7 @@ As a developer I was pretty tired of not being able to fake a response for an AP
 
 This app makes use of the [Slim Framework](https://www.slimframework.com/) to put things together. Please check the framework documentation where II have hinted in the documentation below.
 
-This app also comes with a basic Docker compose file to enable easy further development, testing and deployment
+This app also comes with a basic Docker compose file to enable easy further development, testing and deployment. I'm open to suggestions and corrections, feel free to create issues or a PR in Github.
 
 ## Todo
 
